@@ -1,0 +1,25 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <link rel="stylesheet" href="https://cdn.bootcss.com/bootstrap/4.0.0/css/bootstrap.min.css"
+        integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm"
+        crossorigin="anonymous">
+  <meta charset="UTF-8">
+  <title>考勤</title>
+</head>
+<body>
+
+<form enctype="multipart/form-data" method="post" action="/upload">
+  <div class="container" style="padding-top: 20%;">
+    <div class="row align-items-center">
+      <div class="col">
+        <input type="file" name="file">
+      </div>
+      <div class="col">
+        <button type="submit" class="btn btn-outline-primary btn-lg btn-block">生成考勤记录</button>
+      </div>
+    </div>
+  </div>
+</form>
+</body>
+</html>
