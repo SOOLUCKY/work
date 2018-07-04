@@ -34,6 +34,7 @@ public class FileServiceImpl implements FileService {
 
         //1. 拿到数据后根据id和日期分组
         Map<String, Map<String, List<String[]>>> map = data.getDatas().stream()
+            .sorted(Comparator.comparing(strings -> DateUtils.parseDate(strings[3])))
             .collect(Collectors.groupingBy(d -> d[2], Collectors.groupingBy(
                 d -> {
                     String date;
@@ -111,23 +112,26 @@ public class FileServiceImpl implements FileService {
 
             });
 
+            staff.getWorkCheckList().sort(Comparator.comparing(WorkCheck::getDate));
             staffList.add(staff);
         });
 
         staffList.sort(Comparator.comparing(Staff::getId));
-        return checkExport(staffList, DateUtils.parseDate(staffList.get(0).getWorkCheckList().get(0).getDate()));
+        return checkExport(staffList);
     }
 
-    private ResponseEntity<byte[]> checkExport(List<Staff> staffList, Date month) throws Exception {
+    private ResponseEntity<byte[]> checkExport(List<Staff> staffList) throws Exception {
 
         ExcelData data = new ExcelData();
 
         ArrayList<String> titleList = new ArrayList<>();
         titleList.add("姓名");
-        titleList.addAll(DateUtils.getAllDatesOfMonth(month).stream().map(date ->
-            DateUtils.format(date, DateUtils.yyyyMMdd1).concat("(").concat(DateUtils.getWeekday(date))
-                .concat(")")
-        ).collect(Collectors.toList()));
+        titleList.addAll(staffList.stream().max(Comparator.comparing(staff -> staff.getWorkCheckList().size())).get()
+            .getWorkCheckList().stream().map(workCheck ->
+                DateUtils.format(DateUtils.parseDate(workCheck.getDate()), DateUtils.yyyyMMdd1).concat("(")
+                    .concat(DateUtils.getWeekday(DateUtils.parseDate(workCheck.getDate())))
+                    .concat(")")
+            ).collect(Collectors.toList()));
 
         String[] titleStrArr = titleList.toArray(new String[titleList.size()]);
         data.setTitles(titleStrArr);
