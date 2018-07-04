@@ -61,9 +61,6 @@ public class FileServiceImpl implements FileService {
 
                 staff.setName((entry2.getValue().get(0))[1]);
 
-                List<String> dateStrList = entry2.getValue().stream().map(e -> e[3])
-                    .collect(Collectors.toList());
-
                 List<Date> dateList = entry2.getValue().stream().map(e -> DateUtils.parseDate(e[3]))
                     .collect(Collectors.toList());
 
