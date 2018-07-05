@@ -34,7 +34,6 @@ public class FileServiceImpl implements FileService {
 
         //1. 拿到数据后根据id和日期分组
         Map<String, Map<String, List<String[]>>> map = data.getDatas().stream()
-            .sorted(Comparator.comparing(strings -> DateUtils.parseDate(strings[3])))
             .collect(Collectors.groupingBy(d -> d[2], Collectors.groupingBy(
                 d -> {
                     String date;
