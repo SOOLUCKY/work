@@ -7,11 +7,14 @@ import java.time.LocalDateTime;
 import java.time.Month;
 import java.time.YearMonth;
 import java.time.ZoneId;
+import java.time.temporal.ChronoUnit;
+import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
+import java.util.stream.Stream;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.time.DateFormatUtils;
 import org.apache.poi.ss.usermodel.DateUtil;
@@ -116,7 +119,7 @@ public class DateUtils extends org.apache.commons.lang3.time.DateUtils {
     }
 
 
-    public static String[] WEEK_DAYS_ZJ = {"星期天", "星期一", "星期二", "星期三", "星期四", "星期五", "星期六"};
+    public static String[] WEEK_DAYS_ZJ = {"周日", "周一", "周二", "周三", "周四", "周五", "周六"};
 
     /**
      * 根据日期获取星期几
@@ -328,6 +331,26 @@ public class DateUtils extends org.apache.commons.lang3.time.DateUtils {
         List<Date> dates = IntStream.rangeClosed(1, YearMonth.of(year, month).lengthOfMonth())
             .mapToObj(day -> localDateToDate(LocalDate.of(year, month, day))).collect(Collectors.toList());
         return dates;
+    }
+
+    /**
+     * 获取指定两个日期之间的所有日期
+     */
+    public static List<String> getAllDatesOfTwoDate(String start, String end) {
+
+        List<String> list = new ArrayList<>();
+        LocalDate startDate = LocalDate.parse(start);
+        LocalDate endDate = LocalDate.parse(end);
+
+        long distance = ChronoUnit.DAYS.between(startDate, endDate);
+
+        Stream.iterate(startDate, d -> {
+            return d.plusDays(1);
+        }).limit(distance + 1).forEach(f -> {
+            list.add(f.toString());
+        });
+        return list;
+
     }
 
 

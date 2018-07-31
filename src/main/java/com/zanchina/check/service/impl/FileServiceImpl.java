@@ -122,12 +122,29 @@ public class FileServiceImpl implements FileService {
 
         ArrayList<String> titleList = new ArrayList<>();
         titleList.add("姓名");
-        titleList.addAll(staffList.stream().max(Comparator.comparing(staff -> staff.getWorkCheckList().size())).get()
-            .getWorkCheckList().stream().map(workCheck ->
-                DateUtils.format(DateUtils.parseDate(workCheck.getDate()), DateUtils.yyyyMMdd1).concat("(")
-                    .concat(DateUtils.getWeekday(DateUtils.parseDate(workCheck.getDate())))
-                    .concat(")")
-            ).collect(Collectors.toList()));
+
+        // 取打卡记录中最早日期和最晚日期为标题的开始日期和结束日期
+        String start = staffList.stream().min(Comparator.comparing(staff -> staff.getWorkCheckList().get(0).getDate()))
+            .get()
+            .getWorkCheckList().get(0).getDate();
+
+        List<WorkCheck> workCheckList = staffList.stream()
+            .max(Comparator
+                .comparing(staff -> staff.getWorkCheckList().get(staff.getWorkCheckList().size() - 1).getDate()))
+            .get()
+            .getWorkCheckList();
+
+        String end = workCheckList.get(workCheckList.size() - 1).getDate();
+
+        List<String> dateStrs = DateUtils
+            .getAllDatesOfTwoDate(DateUtils.format(DateUtils.parseDate(start), DateUtils.yyyyMMdd),
+                DateUtils.format(DateUtils.parseDate(end), DateUtils.yyyyMMdd));
+
+        titleList.addAll(dateStrs.stream().map(d ->
+            d.concat("(")
+                .concat(DateUtils.getWeekday(DateUtils.parseDate(d)))
+                .concat(")")
+        ).collect(Collectors.toList()));
 
         String[] titleStrArr = titleList.toArray(new String[titleList.size()]);
         data.setTitles(titleStrArr);
@@ -149,7 +166,8 @@ public class FileServiceImpl implements FileService {
                         .equalsIgnoreCase(Integer.toString(7));
 
                     for (WorkCheck check : staff.getWorkCheckList()) {
-                        if (title.substring(0, title.indexOf("(")).equalsIgnoreCase(check.getDate())) {
+                        if (title.substring(0, title.indexOf("(")).equalsIgnoreCase(
+                            DateUtils.format(DateUtils.parseDate(check.getDate()), DateUtils.yyyyMMdd))) {
 
                             String detail = "";
                             if (!isWeekend) {
