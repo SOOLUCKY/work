@@ -245,10 +245,12 @@ public class FileServiceImpl implements FileService {
                 newWorkCheckList.add(w);
             });
 
+            newWorkCheckList.sort(Comparator.comparing(WorkCheck::getDate));
             staff.setWorkCheckList(newWorkCheckList);
             newStaffList.add(staff);
         });
 
+        newStaffList.sort(Comparator.comparing(Staff::getName));
         return newStaffList;
     }
 
@@ -261,15 +263,18 @@ public class FileServiceImpl implements FileService {
         titleList.add("姓名");
 
         // 取打卡记录中最早日期和最晚日期为标题的开始日期和结束日期
-        String start = staffList.stream().min(Comparator.comparing(staff -> staff.getWorkCheckList().get(0).getDate()))
+        String start = staffList.stream().min(
+            Comparator.comparing(staff -> DateUtils.parseDate(staff.getWorkCheckList().stream()
+                .min(Comparator.comparing(w -> DateUtils.parseDate(w.getDate()).getTime())).get().getDate())
+                .getTime()))
             .get()
             .getWorkCheckList().get(0).getDate();
 
-        List<WorkCheck> workCheckList = staffList.stream()
-            .max(Comparator
-                .comparing(staff -> staff.getWorkCheckList().get(staff.getWorkCheckList().size() - 1).getDate()))
-            .get()
-            .getWorkCheckList();
+        List<WorkCheck> workCheckList = staffList.stream().max(
+            Comparator.comparing(staff -> DateUtils.parseDate(staff.getWorkCheckList().stream()
+                .max(Comparator.comparing(w -> DateUtils.parseDate(w.getDate()).getTime())).get().getDate())
+                .getTime()))
+            .get().getWorkCheckList();
 
         String end = workCheckList.get(workCheckList.size() - 1).getDate();
 
