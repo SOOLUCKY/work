@@ -74,7 +74,7 @@ public class ExcelRead {
     }
 
 
-    public ExcelData parse(InputStream in, String fileName, boolean bool) {
+    public ExcelData parse(InputStream in, String fileName, boolean bool, Integer titleIndex) {
         Workbook wb = null;
         try {
             String postfix = fileName.substring(fileName.lastIndexOf("."), fileName.length());
@@ -91,7 +91,7 @@ public class ExcelRead {
 
         Sheet sheet = wb.getSheetAt(0);
         int rowNum = sheet.getLastRowNum();// 得到总行数
-        Row row = sheet.getRow(0);
+        Row row = sheet.getRow(titleIndex);
         int colNum = row.getPhysicalNumberOfCells();
         String titles[] = readExcelTitle(row);
 
@@ -100,14 +100,14 @@ public class ExcelRead {
         // 正文内容应该从第二行开始,第一行为表头的标题
         //bool是否从标题行开始
         if (bool) {
-            for (int i = 0; i <= rowNum; i++) {
+            for (int i = 0 + titleIndex; i <= rowNum; i++) {
                 int j = 0;
                 row = sheet.getRow(i);
                 content = new String[colNum];
                 do {
                     if (null != row.getCell(j)) {
                         if (null != getCellFormatValue(row.getCell(j))) {
-                            content[j] = getCellFormatValue(row.getCell(j)).trim();
+                            content[j] = getCellFormatValue(row.getCell(j));
                         }
                     }
                     j++;
@@ -115,12 +115,12 @@ public class ExcelRead {
                 list.add(content);
             }
         } else {
-            for (int i = 1; i <= rowNum; i++) {
+            for (int i = 1 + titleIndex; i <= rowNum; i++) {
                 int j = 0;
                 row = sheet.getRow(i);
                 content = new String[colNum];
                 do {
-                    content[j] = getCellFormatValue(row.getCell(j)).trim();
+                    content[j] = getCellFormatValue(row.getCell(j));
                     j++;
                 } while (j < colNum);
                 list.add(content);

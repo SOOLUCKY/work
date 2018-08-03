@@ -21,7 +21,9 @@ public class CheckApplicationTests {
 
         List<String> allDatesOfTwoDate = DateUtils.getAllDatesOfTwoDate("2018-06-30", "2018-07-15");
 
-        System.out.print(allDatesOfTwoDate);
+        Date date = DateUtils.parseDate("2018-07-31".concat(" ").concat("08:55"), DateUtils.yyyyMMddHHmm);
+
+        System.out.print(date);
     }
 
 }
