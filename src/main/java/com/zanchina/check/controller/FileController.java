@@ -10,6 +10,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
@@ -37,7 +38,7 @@ public class FileController {
     @PostMapping("upload")
     @ResponseBody
     public ResponseEntity<byte[]> uploadAndExport(
-        HttpServletRequest request) {
+        HttpServletRequest request, HttpServletResponse response) {
 
         try {
             ExcelRead inst = ExcelRead.getInst();
@@ -76,7 +77,11 @@ public class FileController {
             return fileService.checkExport(staffList1);
 
         } catch (Exception e) {
-            e.printStackTrace();
+            try {
+                response.getWriter().print(e.getMessage());
+            } catch (IOException e2) {
+                return null;
+            }
         }
 
         return null;
