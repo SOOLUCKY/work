@@ -316,22 +316,13 @@ public class FileServiceImpl implements FileService {
                                 detail = check.getState();
                             }
 
-                            String durationStr = "";
-
-                            Double duration = check.getDuration();
-                            if (duration > 11.5) {
-                                durationStr = Double.toString(
-                                    new BigDecimal(duration).setScale(0, BigDecimal.ROUND_HALF_UP).doubleValue());
-                            } else {
-                                durationStr = Double.toString(
-                                    new BigDecimal(duration).setScale(1, BigDecimal.ROUND_HALF_UP).doubleValue());
-                            }
-
                             d[index] = detail.concat("(")
                                 .concat(DateUtils.getHHmmTime(DateUtils.parseDate(check.getOnTime()))).concat("~")
                                 .concat(
                                     DateUtils.getHHmmTime(DateUtils.parseDate(check.getOffTime())).concat(",小时数:")
-                                        .concat(durationStr)
+                                        .concat(Double.toString(
+                                            new BigDecimal(check.getDuration()).setScale(2, BigDecimal.ROUND_HALF_UP)
+                                                .doubleValue()))
                                         .concat(")"));
                             isExist = true;
                         }
