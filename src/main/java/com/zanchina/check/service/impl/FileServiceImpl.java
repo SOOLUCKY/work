@@ -133,7 +133,7 @@ public class FileServiceImpl implements FileService {
         map.entrySet().forEach(entry -> {
 
             Staff staff = new Staff();
-            staff.setId(Integer.valueOf(entry.getKey()));
+            staff.setId(entry.getKey());
 
             entry.getValue().entrySet().forEach(entry2 -> {
 

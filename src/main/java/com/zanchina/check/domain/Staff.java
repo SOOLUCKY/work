@@ -13,7 +13,7 @@ public class Staff {
     /**
      * 考勤号
      */
-    private Integer id;
+    private String id;
 
     /**
      * 员工名
