@@ -69,7 +69,7 @@ public class FileController {
                     } else if (fileName.contains("考勤导出")) {
                         data = inst.parse(inputStream, fileName, false, 0);
                         staffs = fileService.workRecord(data);
-                    } else if (fileName.contains("钉钉签到")) {
+                    } else if (fileName.contains("钉钉")) {
                         data = inst.parse(inputStream, fileName, false, 2);
                         staffs = fileService.dingdingWorkStatistics(data);
                     }
@@ -90,7 +90,6 @@ public class FileController {
             } catch (IOException e2) {
                 e2.printStackTrace();
             }
-
             e.printStackTrace();
         }
 
