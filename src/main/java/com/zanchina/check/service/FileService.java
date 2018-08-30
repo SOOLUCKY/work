@@ -21,4 +21,6 @@ public interface FileService {
     List<Staff> workRecord(ExcelData data);
 
     List<Staff> staffListCollect(List<Staff> staffList);
+
+    List<Staff> dingdingWorkStatistics(ExcelData data);
 }

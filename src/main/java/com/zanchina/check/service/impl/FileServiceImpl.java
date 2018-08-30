@@ -167,6 +167,52 @@ public class FileServiceImpl implements FileService {
     }
 
     /**
+     * 钉钉考勤记录处理
+     */
+    @Override
+    public List<Staff> dingdingWorkStatistics(ExcelData data) {
+        //1. 拿到数据后根据姓名和日期分组
+        Map<String, Map<String, List<String[]>>> map = data.getDatas().stream()
+            .collect(Collectors.groupingBy(d -> d[0], Collectors.groupingBy(
+                d -> d[4])));
+
+        //2. 取出最大时间和最小时间，计算考勤状态，生成workcheck
+        List<Staff> staffList = new ArrayList<>();
+
+        map.entrySet().forEach(entry -> {
+
+            Staff staff = new Staff();
+            staff.setName(entry.getKey());
+
+            entry.getValue().entrySet().forEach(entry2 -> {
+
+                List<Date> dateList = entry2.getValue().stream().map(e -> DateUtils.parseDate(e[4].concat(" ").concat(e[5])))
+                    .collect(Collectors.toList());
+
+                WorkCheck workCheck = new WorkCheck();
+                workCheck.setDate(entry2.getKey());
+
+//                上班时间算一天当中最小的时间
+                Date minDate = dateList.stream().min(Comparator.comparing(d -> d.getTime())).get();
+                workCheck.setOnTime(DateUtils.formatDate(minDate, DateUtils.yyyyMMddHHmm));
+
+                //下班时间算一天当中最大的时间
+                Date maxDate = dateList.stream().max(Comparator.comparing(d -> d.getTime())).get();
+                workCheck.setOffTime(DateUtils.formatDate(maxDate, DateUtils.yyyyMMddHHmm));
+                workCheck.setState(caculateWorkState(workCheck));
+
+                staff.getWorkCheckList().add(workCheck);
+
+            });
+
+            staff.getWorkCheckList().sort(Comparator.comparing(WorkCheck::getDate));
+            staffList.add(staff);
+        });
+
+        return staffList;
+    }
+
+    /**
      * 计算出勤状态（迟到、早退、迟到和早退、正常）
      */
     private String caculateWorkState(WorkCheck workCheck) {
@@ -336,7 +382,6 @@ public class FileServiceImpl implements FileService {
                         }
                     }
                 }
-
             }
 
             datas.add(d);

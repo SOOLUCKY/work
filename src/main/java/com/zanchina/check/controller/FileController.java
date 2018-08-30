@@ -50,31 +50,35 @@ public class FileController {
 
             List<Staff> staffList = new ArrayList<>();
 
-            files = files.stream().filter(f -> StringUtils.isNotBlank(f.getOriginalFilename())).collect(Collectors.toList());
-                files.forEach(file -> {
-                    try {
+            files = files.stream().filter(f -> StringUtils.isNotBlank(f.getOriginalFilename()))
+                .collect(Collectors.toList());
+            files.forEach(file -> {
+                try {
 
-                        InputStream inputStream = file.getInputStream();
-                        String fileName = file.getOriginalFilename();
-                        ExcelData data = null;
-                        List<Staff> staffs = new ArrayList<>(0);
+                    InputStream inputStream = file.getInputStream();
+                    String fileName = file.getOriginalFilename();
+                    ExcelData data = null;
+                    List<Staff> staffs = new ArrayList<>(0);
 
-                        if (fileName.contains("上下班打卡_日报")) {
-                            data = inst.parse(inputStream, fileName, false, 2);
-                            staffs = fileService.wechatWorkInStatistics(data);
-                        } else if (fileName.contains("外出打卡_日报")) {
-                            data = inst.parse(inputStream, fileName, false, 2);
-                            staffs = fileService.wechatWorkOutStatistics(data);
-                        } else if (fileName.contains("考勤导出")) {
-                            data = inst.parse(inputStream, fileName, false, 0);
-                            staffs = fileService.workRecord(data);
-                        }
-                        staffList.addAll(staffs);
-
-                    } catch (IOException e) {
-                        e.printStackTrace();
+                    if (fileName.contains("上下班打卡_日报")) {
+                        data = inst.parse(inputStream, fileName, false, 2);
+                        staffs = fileService.wechatWorkInStatistics(data);
+                    } else if (fileName.contains("外出打卡_日报")) {
+                        data = inst.parse(inputStream, fileName, false, 2);
+                        staffs = fileService.wechatWorkOutStatistics(data);
+                    } else if (fileName.contains("考勤导出")) {
+                        data = inst.parse(inputStream, fileName, false, 0);
+                        staffs = fileService.workRecord(data);
+                    } else if (fileName.contains("钉钉签到")) {
+                        data = inst.parse(inputStream, fileName, false, 2);
+                        staffs = fileService.dingdingWorkStatistics(data);
                     }
-                });
+                    staffList.addAll(staffs);
+
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+            });
 
             List<Staff> staffList1 = fileService.staffListCollect(staffList);
             return fileService.checkExport(staffList1);

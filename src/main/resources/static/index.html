@@ -10,19 +10,31 @@
 <body>
 
 <form enctype="multipart/form-data" method="post" action="/upload">
-  <div class="container" style="padding-top: 20%;">
-    <h4>上传文件类型支持：1 .打卡机导出表 2 .企业微信上下班打卡记录 3 .企业微信外出打卡记录
-    </h4>
-    <p></p>
+  <div class="container" style="padding-top: 10%;">
     <div class="row align-items-center">
-      <div class="col">
-        <p>文件1：<input type="file" name="file"/></p>
-        <p>文件2：<input type="file" name="file"/></p>
-        <p>文件3：<input type="file" name="file"/></p>
-      </div>
-      <div class="col">
-        <button type="submit" class="btn btn-outline-primary btn-lg btn-block">生成考勤记录</button>
-      </div>
+      <table class="table table-bordered">
+        <tbody>
+        <tr>
+          <th scope="row">打卡机考勤记录：</th>
+          <td><input type="file" name="file"/></td>
+        </tr>
+        <tr>
+          <th scope="row">企业微信上下班打卡记录：</th>
+          <td><input type="file" name="file"/></td>
+        </tr>
+        <tr>
+          <th scope="row">企业微信外出打卡记录：</th>
+          <td><input type="file" name="file"/></td>
+        </tr>
+        <tr>
+          <th scope="row">钉钉打卡记录：</th>
+          <td><input type="file" name="file"/></td>
+        </tr>
+        </tbody>
+      </table>
+
+      <button type="submit" class="btn btn-outline-primary btn-lg btn-block">生成考勤记录</button>
+
     </div>
   </div>
 </form>
