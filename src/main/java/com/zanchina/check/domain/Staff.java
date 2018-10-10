@@ -23,7 +23,7 @@ public class Staff {
     /**
      * 部门
      */
-    private String department;
+    private String department = "";
 
     /**
      * 出勤列表

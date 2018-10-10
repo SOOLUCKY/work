@@ -274,8 +274,11 @@ public class FileServiceImpl implements FileService {
             List<Staff> value = staffEntry.getValue();
 
             List<WorkCheck> workChecks = new ArrayList<>();
+
+            List<Staff> staffList1 = value.stream().filter(staff1 -> StringUtils.isNotBlank(staff1.getDepartment()))
+                .collect(Collectors.toList());
+            staff.setDepartment(staffList1.size() > 0 ? staffList1.get(0).getDepartment() : "");
             value.forEach(s -> {
-                    staff.setDepartment(s.getDepartment());
                     workChecks.addAll(s.getWorkCheckList());
                 }
             );
