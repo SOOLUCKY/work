@@ -31,6 +31,11 @@ public class WorkCheck {
     private String state;
 
     /**
+     * 审批
+     */
+    private String approve = "";
+
+    /**
      * 出勤时长(小时为单位)
      */
     private Double duration;

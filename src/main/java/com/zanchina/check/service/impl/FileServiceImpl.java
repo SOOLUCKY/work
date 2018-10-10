@@ -48,6 +48,8 @@ public class FileServiceImpl implements FileService {
             staff.setName(entry.getKey());
 
             entry.getValue().forEach(col -> {
+                staff.setDepartment(col[3]);
+
                 WorkCheck workCheck = new WorkCheck();
                 workCheck.setDate(col[0]);
                 workCheck.setOnTime(col[0].concat(" ").concat(col[4]));
@@ -81,6 +83,8 @@ public class FileServiceImpl implements FileService {
             staff.setName(entry.getKey());
 
             entry.getValue().forEach(col -> {
+                staff.setDepartment(col[3]);
+
                 WorkCheck workCheck = new WorkCheck();
                 workCheck.setDate(col[0]);
                 if (col[11].contains("--")) {
@@ -95,6 +99,7 @@ public class FileServiceImpl implements FileService {
                     workCheck.setOffTime(col[0].concat(" ").concat(col[14]));
                 }
                 workCheck.setState(caculateWorkState(workCheck));
+                workCheck.setApprove(col[7].contains("--") ? "" : col[7]);
 
                 staff.getWorkCheckList().add(workCheck);
             });
@@ -186,7 +191,8 @@ public class FileServiceImpl implements FileService {
 
             entry.getValue().entrySet().forEach(entry2 -> {
 
-                List<Date> dateList = entry2.getValue().stream().map(e -> DateUtils.parseDate(e[4].concat(" ").concat(e[5])))
+                List<Date> dateList = entry2.getValue().stream()
+                    .map(e -> DateUtils.parseDate(e[4].concat(" ").concat(e[5])))
                     .collect(Collectors.toList());
 
                 WorkCheck workCheck = new WorkCheck();
@@ -269,6 +275,7 @@ public class FileServiceImpl implements FileService {
 
             List<WorkCheck> workChecks = new ArrayList<>();
             value.forEach(s -> {
+                    staff.setDepartment(s.getDepartment());
                     workChecks.addAll(s.getWorkCheckList());
                 }
             );
@@ -288,6 +295,11 @@ public class FileServiceImpl implements FileService {
                 w.setOffTime(offTime);
                 w.setDate(entry.getKey());
                 w.setState(caculateWorkState(w));
+
+                List<WorkCheck> approveList = singleDateWorkCheck.stream()
+                    .filter(wc -> StringUtils.isNotBlank(wc.getApprove()))
+                    .collect(Collectors.toList());
+                w.setApprove(approveList.size() > 0 ? approveList.get(0).getApprove() : "");
                 newWorkCheckList.add(w);
             });
 
@@ -296,7 +308,7 @@ public class FileServiceImpl implements FileService {
             newStaffList.add(staff);
         });
 
-        newStaffList.sort(Comparator.comparing(Staff::getName));
+        newStaffList.sort(Comparator.comparing(Staff::getDepartment));
         return newStaffList;
     }
 
@@ -344,7 +356,7 @@ public class FileServiceImpl implements FileService {
 
             for (String title : titleList) {
                 if ("姓名".equalsIgnoreCase(title)) {
-                    d[0] = staff.getName();
+                    d[0] = staff.getName().concat("(").concat(staff.getDepartment()).concat(")");
                 } else {
                     int index = titleList.indexOf(title);
                     boolean isExist = false;
@@ -357,9 +369,14 @@ public class FileServiceImpl implements FileService {
                         if (title.substring(0, title.indexOf("(")).equalsIgnoreCase(
                             DateUtils.format(DateUtils.parseDate(check.getDate()), DateUtils.yyyyMMdd))) {
 
+                            isExist = true;
                             String detail = "";
                             if (!isWeekend) {
-                                detail = check.getState();
+                                detail = check.getState().concat(",").concat(check.getApprove());
+                            }
+
+                            if (isExist && isWeekend) {
+                                detail = "加班";
                             }
 
                             d[index] = detail.concat("(")
@@ -370,15 +387,16 @@ public class FileServiceImpl implements FileService {
                                             new BigDecimal(check.getDuration()).setScale(2, BigDecimal.ROUND_HALF_UP)
                                                 .doubleValue()))
                                         .concat(")"));
-                            isExist = true;
+
                         }
+
                     }
 
                     if (!isExist) {
                         if (!isWeekend) {
-                            d[index] = "无考勤记录";
+                            d[index] = "无记录";
                         } else {
-                            d[index] = "";
+                            d[index] = "未加班";
                         }
                     }
                 }

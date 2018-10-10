@@ -21,6 +21,11 @@ public class Staff {
     private String name;
 
     /**
+     * 部门
+     */
+    private String department;
+
+    /**
      * 出勤列表
      */
     private List<WorkCheck> workCheckList = new ArrayList<>();
