@@ -8,13 +8,21 @@ import com.zanchina.check.domain.WorkCheck;
 import com.zanchina.check.service.FileService;
 import java.io.File;
 import java.math.BigDecimal;
+import java.time.LocalDate;
+import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.Date;
+import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
+import java.util.Set;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
+import javax.xml.crypto.Data;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang3.StringUtils;
@@ -316,7 +324,8 @@ public class FileServiceImpl implements FileService {
     }
 
     @Override
-    public ResponseEntity<byte[]> checkExport(List<Staff> staffList) throws Exception {
+    public ResponseEntity<byte[]> checkExport(List<Staff> staffList, Map<String, Set<String>> overtimeMap)
+        throws Exception {
 
         ExcelData data = new ExcelData();
 
@@ -357,6 +366,9 @@ public class FileServiceImpl implements FileService {
         staffList.forEach(staff -> {
             String[] d = new String[titleStrArr.length];
 
+            //查看此人是否有加班数据
+            Set<String> strings = overtimeMap.get(staff.getName());
+
             for (String title : titleList) {
                 if ("姓名".equalsIgnoreCase(title)) {
                     d[0] = staff.getName().concat("(").concat(staff.getDepartment()).concat(")");
@@ -368,18 +380,33 @@ public class FileServiceImpl implements FileService {
                     boolean isWeekend = week.equalsIgnoreCase(Integer.toString(6)) || week
                         .equalsIgnoreCase(Integer.toString(7));
 
+                    String today = title.substring(0, title.indexOf("("));
+                    String detail = "";
+                    Boolean isOverTime = false;
+
+                    // 判断当天是否有加班数据
+                    if (Objects.nonNull(strings) && !strings.isEmpty()) {
+                        List<String> overtime = strings.stream().filter(s -> s.equalsIgnoreCase(today))
+                            .collect(Collectors.toList());
+
+                        if (Objects.nonNull(overtime) && overtime.size() > 0) {
+                            isOverTime = true;
+                        }
+                    }
+
                     for (WorkCheck check : staff.getWorkCheckList()) {
-                        if (title.substring(0, title.indexOf("(")).equalsIgnoreCase(
+
+                        if (today.equalsIgnoreCase(
                             DateUtils.format(DateUtils.parseDate(check.getDate()), DateUtils.yyyyMMdd))) {
 
                             isExist = true;
-                            String detail = "";
+
                             if (!isWeekend) {
                                 detail = check.getState().concat(",").concat(check.getApprove());
                             }
 
-                            if (isExist && isWeekend) {
-                                detail = "加班";
+                            if (isOverTime) {
+                                detail.concat("加班");
                             }
 
                             d[index] = detail.concat("(")
@@ -396,10 +423,14 @@ public class FileServiceImpl implements FileService {
                     }
 
                     if (!isExist) {
-                        if (!isWeekend) {
-                            d[index] = "无记录";
+                        if (isWeekend) {
+                            if (isOverTime) {
+                                d[index] = "加班";
+                            } else {
+                                d[index] = "未加班";
+                            }
                         } else {
-                            d[index] = "未加班";
+                            d[index] = "无记录";
                         }
                     }
                 }
@@ -419,5 +450,43 @@ public class FileServiceImpl implements FileService {
         dfileName = new String(dfileName.getBytes("UTF-8"), "iso8859-1");
         headers.setContentDispositionFormData("attachment", dfileName);
         return new ResponseEntity<>(FileUtils.readFileToByteArray(dst), headers, HttpStatus.CREATED);
+    }
+
+
+    @Override
+    public Map<String, Set<String>> overtimeRecord(ExcelData data) {
+
+        //1. 根据员工姓名分组
+        Map<String, List<String[]>> map = data.getDatas().stream().collect(Collectors.groupingBy(d -> d[2]));
+
+        Map<String, Set<String>> overtimeData = new HashMap<>();
+
+        map.entrySet().forEach(entry -> {
+            String name = entry.getKey();
+            List<String[]> value = entry.getValue();
+
+            Set<String> dateList = new HashSet<>();
+
+            value.stream().filter(strings -> strings[9].equalsIgnoreCase("已通过"))
+                .forEach(strings1 -> {
+
+                    try {
+                        String start = DateUtils
+                            .formatDate(DateUtils.parseDate(strings1[6], DateUtils.yyyyMMddHHmm1),
+                                DateUtils.yyyyMMdd);
+                        String end = DateUtils
+                            .formatDate(DateUtils.parseDate(strings1[7], DateUtils.yyyyMMddHHmm1),
+                                DateUtils.yyyyMMdd);
+                        dateList.addAll(DateUtils.getAllDatesOfTwoDate(start, end));
+                    } catch (Exception e) {
+                        e.printStackTrace();
+                    }
+                });
+
+            overtimeData.put(name, dateList);
+
+        });
+
+        return overtimeData;
     }
 }

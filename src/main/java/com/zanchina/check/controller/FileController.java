@@ -7,8 +7,11 @@ import com.zanchina.check.service.FileService;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Objects;
+import java.util.Set;
 import java.util.stream.Collectors;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -49,10 +52,11 @@ public class FileController {
                 .getFiles("file");
 
             List<Staff> staffList = new ArrayList<>();
+            Map<String, Set<String>> overtimeMap = new HashMap<>();
 
             files = files.stream().filter(f -> StringUtils.isNotBlank(f.getOriginalFilename()))
                 .collect(Collectors.toList());
-            files.forEach(file -> {
+            for (MultipartFile file : files) {
                 try {
 
                     InputStream inputStream = file.getInputStream();
@@ -66,6 +70,9 @@ public class FileController {
                     } else if (fileName.contains("外出打卡_日报")) {
                         data = inst.parse(inputStream, fileName, false, 2);
                         staffs = fileService.wechatWorkOutStatistics(data);
+                    } else if (fileName.contains("审批记录")) {//加班
+                        data = inst.parse(inputStream, fileName, false, 0);
+                        overtimeMap = fileService.overtimeRecord(data);
                     } else if (fileName.contains("考勤导出")) {
                         data = inst.parse(inputStream, fileName, false, 0);
                         staffs = fileService.workRecord(data);
@@ -78,10 +85,10 @@ public class FileController {
                 } catch (IOException e) {
                     e.printStackTrace();
                 }
-            });
+            }
 
             List<Staff> staffList1 = fileService.staffListCollect(staffList);
-            return fileService.checkExport(staffList1);
+            return fileService.checkExport(staffList1, overtimeMap);
 
         } catch (Exception e) {
             try {

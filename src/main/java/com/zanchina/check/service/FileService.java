@@ -3,7 +3,11 @@ package com.zanchina.check.service;
 import com.zanchina.check.common.ExcelData;
 import com.zanchina.check.domain.Staff;
 import java.text.ParseException;
+import java.util.Date;
 import java.util.List;
+import java.util.Map;
+import java.util.Set;
+import javax.xml.crypto.Data;
 import org.springframework.http.ResponseEntity;
 
 /**
@@ -12,7 +16,7 @@ import org.springframework.http.ResponseEntity;
 
 public interface FileService {
 
-    ResponseEntity<byte[]> checkExport(List<Staff> staffList) throws Exception;
+    ResponseEntity<byte[]> checkExport(List<Staff> staffList, Map<String, Set<String>> map) throws Exception;
 
     List<Staff> wechatWorkOutStatistics(ExcelData data);
 
@@ -23,4 +27,6 @@ public interface FileService {
     List<Staff> staffListCollect(List<Staff> staffList);
 
     List<Staff> dingdingWorkStatistics(ExcelData data);
+
+    Map<String, Set<String>> overtimeRecord(ExcelData data);
 }
