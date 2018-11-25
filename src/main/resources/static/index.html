@@ -6,6 +6,12 @@
   <meta charset="UTF-8">
   <title>考勤</title>
 </head>
+<style>
+  span {
+    font-size: larger;
+    color: red;
+  }
+</style>
 <body>
 
 <form enctype="multipart/form-data" method="post" action="/upload">
@@ -15,25 +21,34 @@
         <tbody>
 
         <tr>
-          <th scope="row">企业微信上下班打卡记录：</th>
-          <td><input type="file" name="file"/></td>
+          <th scope="row">企业微信<span>上下班打卡</span>记录：</th>
+          <td><input type="file" name="inside"/></td>
         </tr>
         <tr>
-          <th scope="row">企业微信外出打卡记录：</th>
-          <td><input type="file" name="file"/></td>
+          <th scope="row">企业微信<span>外出打卡</span>记录：</th>
+          <td><input type="file" name="outside"/></td>
         </tr>
         <tr>
-          <th scope="row">企业微信加班审批记录：</th>
-          <td><input type="file" name="file"/></td>
+          <th scope="row">企业微信<span>补打卡</span>审批记录：</th>
+          <td><input type="file" name="repair"/></td>
         </tr>
         <tr>
+          <th scope="row">企业微信<span>请假</span>审批记录：</th>
+          <td><input type="file" name="leave"/></td>
+        </tr>
+        <tr>
+          <th scope="row">企业微信<span>加班</span>审批记录：</th>
+          <td><input type="file" name="overtime"/></td>
+        </tr>
+
+        <!--<tr>
           <th scope="row">打卡机考勤记录：</th>
           <td><input type="file" name="file"/></td>
         </tr>
         <tr>
           <th scope="row">钉钉打卡记录：</th>
           <td><input type="file" name="file"/></td>
-        </tr>
+        </tr>-->
         </tbody>
       </table>
 

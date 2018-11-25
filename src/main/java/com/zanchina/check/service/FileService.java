@@ -16,7 +16,8 @@ import org.springframework.http.ResponseEntity;
 
 public interface FileService {
 
-    ResponseEntity<byte[]> checkExport(List<Staff> staffList, Map<String, Set<String>> map) throws Exception;
+    ResponseEntity<byte[]> checkExport(List<Staff> staffList, Map<String, Set<String>> overtimeMap,
+        Map<String, Set<String>> repairMap, Map<String, Set<String>> leaveMap) throws Exception;
 
     List<Staff> wechatWorkOutStatistics(ExcelData data);
 
@@ -29,4 +30,8 @@ public interface FileService {
     List<Staff> dingdingWorkStatistics(ExcelData data);
 
     Map<String, Set<String>> overtimeRecord(ExcelData data);
+
+    Map<String, Set<String>> repairRecord(ExcelData data);
+
+    Map<String, Set<String>> leaveRecord(ExcelData data);
 }

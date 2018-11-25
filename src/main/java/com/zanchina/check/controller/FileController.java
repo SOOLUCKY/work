@@ -48,47 +48,71 @@ public class FileController {
         try {
             ExcelRead inst = ExcelRead.getInst();
 
-            List<MultipartFile> files = ((MultipartHttpServletRequest) request)
-                .getFiles("file");
+            MultipartFile insideFile = ((MultipartHttpServletRequest) request).getFile("inside");
+            MultipartFile outFile = ((MultipartHttpServletRequest) request).getFile("outside");
+            //补卡
+            MultipartFile repairFile = ((MultipartHttpServletRequest) request).getFile("repair");
+            //请假
+            MultipartFile leaveFile = ((MultipartHttpServletRequest) request).getFile("leave");
+            //加班
+            MultipartFile overtimeFile = ((MultipartHttpServletRequest) request).getFile("overtime");
 
             List<Staff> staffList = new ArrayList<>();
+            Map<String, Set<String>> repairMap = new HashMap<>();
+            Map<String, Set<String>> leaveMap = new HashMap<>();
             Map<String, Set<String>> overtimeMap = new HashMap<>();
 
-            files = files.stream().filter(f -> StringUtils.isNotBlank(f.getOriginalFilename()))
-                .collect(Collectors.toList());
-            for (MultipartFile file : files) {
-                try {
+            InputStream inputStream;
+            String fileName;
+            ExcelData data;
+            List<Staff> staffs;
 
-                    InputStream inputStream = file.getInputStream();
-                    String fileName = file.getOriginalFilename();
-                    ExcelData data = null;
-                    List<Staff> staffs = new ArrayList<>(0);
+            try {
 
-                    if (fileName.contains("上下班打卡_日报")) {
-                        data = inst.parse(inputStream, fileName, false, 2);
-                        staffs = fileService.wechatWorkInStatistics(data);
-                    } else if (fileName.contains("外出打卡_日报")) {
-                        data = inst.parse(inputStream, fileName, false, 2);
-                        staffs = fileService.wechatWorkOutStatistics(data);
-                    } else if (fileName.contains("审批记录")) {//加班
-                        data = inst.parse(inputStream, fileName, false, 0);
-                        overtimeMap = fileService.overtimeRecord(data);
-                    } else if (fileName.contains("考勤导出")) {
-                        data = inst.parse(inputStream, fileName, false, 0);
-                        staffs = fileService.workRecord(data);
-                    } else if (fileName.contains("钉钉")) {
-                        data = inst.parse(inputStream, fileName, false, 2);
-                        staffs = fileService.dingdingWorkStatistics(data);
-                    }
+                if (Objects.nonNull(insideFile) && StringUtils.isNotEmpty(insideFile.getOriginalFilename())) {
+                    inputStream = insideFile.getInputStream();
+                    fileName = insideFile.getOriginalFilename();
+
+                    data = inst.parse(inputStream, fileName, false, 2);
+                    staffs = fileService.wechatWorkInStatistics(data);
                     staffList.addAll(staffs);
-
-                } catch (IOException e) {
-                    e.printStackTrace();
                 }
+                if (Objects.nonNull(outFile) && StringUtils.isNotEmpty(outFile.getOriginalFilename())) {
+                    inputStream = outFile.getInputStream();
+                    fileName = outFile.getOriginalFilename();
+
+                    data = inst.parse(inputStream, fileName, false, 2);
+                    staffs = fileService.wechatWorkOutStatistics(data);
+                    staffList.addAll(staffs);
+                }
+                if (Objects.nonNull(repairFile) && StringUtils.isNotEmpty(repairFile.getOriginalFilename())) {
+                    inputStream = repairFile.getInputStream();
+                    fileName = repairFile.getOriginalFilename();
+
+                    data = inst.parse(inputStream, fileName, false, 0);
+                    repairMap = fileService.repairRecord(data);
+                }
+                if (Objects.nonNull(leaveFile) && StringUtils.isNotEmpty(leaveFile.getOriginalFilename())) {
+                    inputStream = leaveFile.getInputStream();
+                    fileName = leaveFile.getOriginalFilename();
+
+                    data = inst.parse(inputStream, fileName, false, 0);
+                    leaveMap = fileService.leaveRecord(data);
+                }
+                if (Objects.nonNull(overtimeFile) && StringUtils
+                    .isNotEmpty(overtimeFile.getOriginalFilename())) {
+                    inputStream = overtimeFile.getInputStream();
+                    fileName = overtimeFile.getOriginalFilename();
+
+                    data = inst.parse(inputStream, fileName, false, 0);
+                    overtimeMap = fileService.overtimeRecord(data);
+                }
+            } catch (Exception e) {
+                e.printStackTrace();
             }
 
             List<Staff> staffList1 = fileService.staffListCollect(staffList);
-            return fileService.checkExport(staffList1, overtimeMap);
+            return fileService.checkExport(staffList1, overtimeMap, repairMap, leaveMap);
 
         } catch (Exception e) {
             try {
